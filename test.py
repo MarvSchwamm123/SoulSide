@@ -1,94 +1,174 @@
 import pygame
-from rooms.green_land import Green_Land
+import numpy as np
 
 pygame.init()
-screen_width=1000
-screen_height=800
 
-screen=pygame.display.set_mode((screen_width, screen_height))
-clock=pygame.time.Clock()
+# Fenster
+WIDTH, HEIGHT = 1000, 800
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Komplexe Funktion")
 
-current_area=Green_Land(screen_width, screen_height)
+clock = pygame.time.Clock()
 
-player=pygame.Rect(100, 500, 50, 50)
-velocity_y=0
-gravity=0.7
-jump_strength=-13
-on_ground=True
-jump_pass=False
-jump_pass_posib=False 
-speed=4
+# Farben
+BG = (20, 20, 25)
+AXIS = (100, 100, 100)
+CURVE = (80, 200, 255)
+TEXT = (240, 240, 240)
 
-cam_x=0
-cam_y=0
+font = pygame.font.SysFont("Arial", 20)
 
-running=True
+# --------------------------------------------------
+# Deine Formel:
+#
+# y = ((z^2 + 1)/(2*z))^(2/3) + 2*i/(z - 1/z)
+# --------------------------------------------------
 
-ESCAPE=False
-SPACE=False
-LEFT=False
-RIGHT=False
+def funktion(z):
+    return ((z**2 + 1) / (2*z))**(2/3) + 2j / (z - 1/z)
+
+
+# z-Werte
+# z darf hier NICHT 0, 1 oder -1 sein,
+# weil dort Divisionen durch 0 entstehen.
+z_values = np.linspace(-10, 10, 30000)
+
+points = []
+
+for z in z_values:
+    if abs(z) < 0.02:
+        continue
+
+    if abs(z - 1) < 0.02 or abs(z + 1) < 0.02:
+        continue
+
+    try:
+        y = funktion(z)
+
+        real = y.real
+        imag = y.imag
+
+        # Extreme Werte ausblenden
+        if abs(real) < 50 and abs(imag) < 50:
+            points.append((real, imag))
+
+    except:
+        pass
+
+
+# Zoom
+SCALE = 80
+
+# Mittelpunkt
+CX = WIDTH // 2
+CY = HEIGHT // 2
+
+
+def to_screen(x, y):
+    screen_x = CX + x * SCALE
+    screen_y = CY - y * SCALE
+    return int(screen_x), int(screen_y)
+
+
+running = True
+
 while running:
-    keys=pygame.key.get_pressed()
-    if keys[pygame.K_ESCAPE]:
-        ESCAPE=True
-    if keys[pygame.K_SPACE]:
-        SPACE=True
-    if keys[pygame.K_a]:
-        LEFT=True
-    if keys[pygame.K_d]:
-        RIGHT=True
 
-    if ESCAPE:
-        running=False
-        ESCAPE=False
-    
-    if LEFT:
-        player.x-=speed
-        LEFT=False
-    if RIGHT:
-        player.x+=speed
-        RIGHT=False
-    
-    if SPACE and on_ground:
-        SPACE=False
-        on_ground=False
-        
-        velocity_y=jump_strength
-        jump_pass=True
-    if jump_pass and not(SPACE):
-        jump_pass=False
-        velocity_y=0
-    velocity_y+=gravity
-    player.y+=velocity_y
-    for platform in current_area.room1:
-        if player.colliderect(platform):
-            if velocity_y>0 and player.bottom>platform.top and player.top<platform.top:
-                player.bottom=platform.top
-                velocity_y=0
-                on_ground=True
-            elif velocity_y<0 and player.top<platform.bottom and player.bottom>platform.bottom:
-                player.top=platform.bottom
-                velocity_y=0
-            elif player.right>platform.left and player.left<platform.left:
-                player.right=platform.left
-            elif player.left<platform.right and player.right>platform.right:
-                player.left=platform.right
+    for event in pygame.event.get():
 
-    for border in current_area.room1_cam_restriction_x_borders:
-        if cam_x>border:
-            cam_x=border
-        if cam_x<-border:
-            cam_x=-border
-    for border in current_area.room1_cam_restriction_y_borders:
-        if cam_y>border:
-            cam_y=border
-        if cam_y<-border:
-            cam_y=-border
+        if event.type == pygame.QUIT:
+            running = False
 
-    for platform in current_area.room1:
-        pygame.draw.rect(screen, (200, 200, 200), (platform.x+cam_x, platform.y+cam_y, platform.width, platform.height))
-    pygame.draw.rect(screen, (200, 100, 100), (player.x+cam_x, player.y+cam_y, player.width, player.height))
-    
+        # Mausrad zum Zoomen
+        if event.type == pygame.MOUSEWHEEL:
+            SCALE *= 1.1 ** event.y
+
+            SCALE = max(5, min(SCALE, 500))
+
+
+    screen.fill(BG)
+
+    # Achsen
+    pygame.draw.line(
+        screen,
+        AXIS,
+        (0, CY),
+        (WIDTH, CY),
+        1
+    )
+
+    pygame.draw.line(
+        screen,
+        AXIS,
+        (CX, 0),
+        (CX, HEIGHT),
+        1
+    )
+
+    # Kurve
+    last_point = None
+
+    for x, y in points:
+
+        sx, sy = to_screen(x, y)
+
+        # Nur zeichnen, wenn Punkt im Fenster liegt
+        if 0 <= sx < WIDTH and 0 <= sy < HEIGHT:
+
+            if last_point is not None:
+
+                # Verhindert Linien quer durchs Bild
+                if abs(sx - last_point[0]) < WIDTH // 2:
+                    pygame.draw.line(
+                        screen,
+                        CURVE,
+                        last_point,
+                        (sx, sy),
+                        2
+                    )
+
+            last_point = (sx, sy)
+
+        else:
+            last_point = None
+
+
+    # Beschriftungen
+    text1 = font.render(
+        "Re(y)",
+        True,
+        TEXT
+    )
+
+    text2 = font.render(
+        "Im(y)",
+        True,
+        TEXT
+    )
+
+    formula = font.render(
+        "y = ((z² + 1)/(2z))^(2/3) + 2i/(z - 1/z)",
+        True,
+        TEXT
+    )
+
+    screen.blit(
+        text1,
+        (WIDTH - 70, CY + 10)
+    )
+
+    screen.blit(
+        text2,
+        (CX + 10, 10)
+    )
+
+    screen.blit(
+        formula,
+        (20, 20)
+    )
+
+    pygame.display.flip()
+    clock.tick(60)
+
 
 pygame.quit()
