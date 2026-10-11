@@ -98,3 +98,12 @@ class Camera:
             (80, 30, 100),
             rect
         )
+        
+    def follow(self, player):
+        self.position.x = player.position.x - (
+            self.screen.get_width() / (2 * self.scale)
+        )
+
+        self.position.y = player.position.y + player.height / 2 - (
+            self.screen.get_height() / (2 * self.scale)
+        )

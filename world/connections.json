@@ -5,12 +5,12 @@
 
         "entrance_a": {
             "start": [10, 0],
-            "end": [10, 4]
+            "end": [10, 3]
         },
 
         "entrance_b": {
             "start": [0, 0],
-            "end": [0, 4]
+            "end": [0, 3]
         }
     }
 ]
