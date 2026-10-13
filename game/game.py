@@ -61,6 +61,8 @@ class Game:
         self.player_acceleration_x = 50
         self.cur_gravity = 25
         
+        self.on_floor = False
+        
         self.entitys = []
 
         self.camera = Camera(self.screen)
@@ -68,13 +70,17 @@ class Game:
         self.entitys.append(self.player)
 
     def run(self):
+        for i in range(0, 10):
+            print("                                                                           ")
+        print("\033[H", end="")
         while self.running:
             current_time = perf_counter()
 
             if current_time - self.last_tps >= 1 / self.TPS:
                 self.last_tps = current_time
-                print("update")
+                print("update                                                               ")
                 self.update()
+                print("\033[H", end="")
 
             if current_time - self.last_fps >= 1 / self.FPS:
                 self.last_fps = current_time
@@ -92,7 +98,8 @@ class Game:
                     self.running = False
 
                 if event.key == self.controls["jump"]:
-                    self.player.start_jump()
+                    if self.player.start_jump(self.on_floor):
+                        self.on_floor = False
 
             elif event.type == pygame.KEYUP:
                 if event.key == self.controls["jump"]:
@@ -116,7 +123,7 @@ class Game:
         self.screen.fill((255, 255, 255))
 
         self.camera.draw_room(self.room)
-        self.camera.draw_player(self.player)
+        self.camera.draw_entity(self.entitys)
 
         pygame.display.flip()
         
@@ -177,7 +184,7 @@ class Game:
         collisions = self.calc_collision(self.player, dx, dy)
 
         if collisions:
-            print("Kollision:", collisions)
+            print("Kollision:", collisions,"                                                                                                            ")
 
     def entity_rect_points(self, entity, x, y):
         left = x - entity.width / 2
@@ -286,14 +293,14 @@ class Game:
 
                 if dy < 0:
                     collisions.append("unten")
-                    entity.can_jump = True
+                    self.on_floor = True
                     entity.jump_held = False
                 else:
                     collisions.append("oben")
             else:
                 entity.position.y = target_y
                 if dy < 0:
-                    entity.can_jump = False
+                    self.on_floor = False
 
         return collisions
 
@@ -369,9 +376,9 @@ class Game:
                     elif start.y == end.y:
                         # Horizontaler Eingang: oben oder unten
                         if target_room[1] > current_room[1]:
-                            player.position.y = door_y + 0.51
+                            player.position.y = door_y + 0
                         elif target_room[1] < current_room[1]:
-                            player.position.y = door_y - 0.51
+                            player.position.y = door_y - 2.01
 
                     return
 

@@ -6,25 +6,20 @@ import pygame
 class Camera:
     def __init__(self, screen: pygame.Surface):
         self.screen = screen
-
-        # Position der Kamera in Weltkoordinaten
+        
         self.position = pygame.Vector2(0, 0)
 
-        # Pixel pro Welt-Einheit
         self.scale = 50
 
     def world_to_screen(self, position: tuple[float, float]):
         x = (position[0] - self.position.x) * self.scale
         y = (position[1] - self.position.y) * self.scale
 
-        # Unsere Welt hat Y nach oben,
-        # Pygame hat Y nach unten.
         y = self.screen.get_height() - y
 
         return int(x), int(y)
 
     def draw_room(self, room):
-        # Raumgrenzen
         points = []
 
         for point in room.boarders:
@@ -45,7 +40,6 @@ class Camera:
                 width=3
             )
 
-        # Kollisionsdreiecke
         for triangle in room.collision:
             points = [
                 self.world_to_screen((
@@ -62,14 +56,12 @@ class Camera:
                 ))
             ]
 
-            # Füllung
             pygame.draw.polygon(
                 self.screen,
                 (100, 100, 100),
                 points
             )
 
-            # Rand
             pygame.draw.polygon(
                 self.screen,
                 (255, 0, 0),
@@ -77,27 +69,44 @@ class Camera:
                 width=2
             )
 
-    def draw_player(self, player):
-        left = player.position.x - player.width / 2
-        bottom = player.position.y
 
-        top_left = self.world_to_screen((
-            left,
-            bottom + player.height
-        ))
+    def draw_entity(self, entitys):
+        colors = {
+            "player": (0, 100, 255),
+            "enemy": (255, 0, 0), 
+            "npc": (0, 200, 0),       
+        }
 
-        rect = pygame.Rect(
-            top_left[0],
-            top_left[1],
-            round(player.width * self.scale),
-            round(player.height * self.scale)
-        )
+        for entity in entitys:
+            if not entity.visible:
+                continue
 
-        pygame.draw.rect(
-            self.screen,
-            (80, 30, 100),
-            rect
-        )
+            color = colors.get(entity.type, (150, 150, 150))
+
+            left = entity.position.x - entity.width / 2
+            bottom = entity.position.y
+
+            top_left = self.world_to_screen((
+                left,
+                bottom + entity.height
+            ))
+
+            width = round(entity.width * self.scale)
+            height = round(entity.height * self.scale)
+
+            rect = pygame.Rect(
+                top_left[0],
+                top_left[1],
+                width,
+                height
+            )
+
+            pygame.draw.rect(
+                self.screen,
+                color,
+                rect,
+                width=2
+            )
         
     def follow(self, player):
         self.position.x = player.position.x - (

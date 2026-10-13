@@ -5,7 +5,9 @@ class Player:
     def __init__(self, position: tuple[float, float], speed: int, health: int, max_health: int, abilities: list, wounds: list, soul_loss_multiplier: float):
         self.position = pygame.Vector2(position)
         
-        self.can_jump = False
+        self.visible = True
+        self.type = "player"
+
         self.jump_hold_time = 0.25
         self.max_jump_hold_time = 0.5
         self.jump_hold_force = 18
@@ -59,14 +61,15 @@ class Player:
     def is_alive(self):
         return self.health > 0
     
-    def start_jump(self):
-        if not self.can_jump:
-            return
+    def start_jump(self, can_jump):
+        if not can_jump:
+            return False
 
         self.y_velocity = self.jump_force
-        self.can_jump = False
         self.jump_held = True
         self.jump_hold_time = 0.0
+
+        return True
 
     def update_jump(self, delta_time):
         if (

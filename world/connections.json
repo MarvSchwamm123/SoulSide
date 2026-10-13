@@ -1,16 +1,96 @@
 [
     {
-        "room_a": [0, 0],
-        "room_b": [10, 0],
-
+        "room_a": [
+            0,
+            0
+        ],
+        "room_b": [
+            10,
+            0
+        ],
         "entrance_a": {
-            "start": [10, 0],
-            "end": [10, 3]
+            "start": [
+                10,
+                0
+            ],
+            "end": [
+                10,
+                3
+            ]
         },
-
         "entrance_b": {
-            "start": [0, 0],
-            "end": [0, 3]
+            "start": [
+                0,
+                0
+            ],
+            "end": [
+                0,
+                3
+            ]
         }
+    },
+    {
+        "room_a": [
+            0,
+            0
+        ],
+        "room_b": [
+            0,
+            15
+        ],
+        "entrance_a": {
+            "start": [
+                0.0,
+                15.0
+            ],
+            "end": [
+                3.0,
+                15.0
+            ]
+        },
+        "entrance_b": {
+            "start": [
+                0.0,
+                0.0
+            ],
+            "end": [
+                3.0,
+                0.0
+            ]
+        },
+        "exit_direction_a": "up",
+        "exit_direction_b": "down"
+    },
+    {
+        "room_a": [
+            10,
+            0
+        ],
+        "room_b": [
+            0,
+            15
+        ],
+        "entrance_a": {
+            "start": [
+                4.0,
+                10.0
+            ],
+            "end": [
+                7.0,
+                10.0
+            ]
+        },
+        "entrance_b": {
+            "start": [
+                14.0,
+                -5.0
+            ],
+            "end": [
+                17.0,
+                -5.0
+            ]
+        },
+        "exit_direction_a": "up",
+        "exit_direction_b": "down"
     }
 ]
