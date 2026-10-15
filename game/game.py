@@ -20,7 +20,6 @@ class Game:
 
         self.screen = pygame.display.set_mode((800, 600))
         pygame.display.set_caption("SoulSide")
-
         self.running = True
 
         self.FPS = 120
@@ -36,7 +35,7 @@ class Game:
             self.connections = json.load(file)
 
         self.room = load_room(
-            (10, 0),
+            (0, 15),
             self.connections
         )
         
@@ -48,7 +47,7 @@ class Game:
         }
         
         self.player = Player(
-            position=(15, 0.6),
+            position=(0.75, 17),
             health=100,
             max_health=100,
             abilities=[],
@@ -181,7 +180,7 @@ class Game:
         dx = self.player.x_velocity * delta_time
         dy = self.player.y_velocity * delta_time
 
-        collisions = self.calc_collision(self.player, dx, dy)
+        collisions = self.calc_collision(self.player, dx, dy, delta_time)
 
         if collisions:
             print("Kollision:", collisions,"                                                                                                            ")
@@ -225,7 +224,7 @@ class Game:
 
         return True
 
-    def calc_collision(self, entity, dx, dy):
+    def calc_collision(self, entity, dx, dy, delta_time):
         collisions = []
 
         # Dreiecke von Raumkoordinaten in Weltkoordinaten umrechnen.
@@ -290,6 +289,8 @@ class Game:
 
                 entity.position.y = start_y + dy * low
                 entity.y_velocity = 0
+                if entity.type == "player":
+                    entity.jump_hold_time = entity.max_jump_hold_time
 
                 if dy < 0:
                     collisions.append("unten")
